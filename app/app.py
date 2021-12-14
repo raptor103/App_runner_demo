@@ -1,7 +1,5 @@
 import io
 from flask import Flask, request, render_template
-from sqlalchemy import create_engine
-import pandas as pd
 from keras.applications.mobilenet import (MobileNet, preprocess_input,
                                           decode_predictions)
 from keras.preprocessing import image
@@ -9,40 +7,6 @@ import numpy as np
 from PIL import Image
 
 app = Flask(__name__, template_folder="template")
-
-
-def create_new_engine():
-    """
-    Create database connection
-    :return: database connection
-    """
-    db_connection_str = "mysql://root:root@db/test"
-    engine = create_engine(db_connection_str)
-    return engine
-
-
-def insert_into_db(category, probability):
-    """
-    Insert currently search image into search historyy
-    :param category: Estimated class of image
-    :param probability: Probability of class
-    :return: None
-    """
-    engine = create_new_engine()
-    query = "INSERT INTO `apicalls` (`category`, `probability`) " \
-            "VALUES (%s, %s)"
-    engine.execute(query, (category, probability))
-    return None
-
-
-def return_apicalls_table_into_pandas():
-    """
-    Get history of searches into dataframe
-    :return: pandas dataframe
-    """
-    engine = create_new_engine()
-    df = pd.read_sql("SELECT * FROM apicalls", con=engine)
-    return df
 
 
 def load_model():
@@ -93,21 +57,16 @@ def upload_file():
 
             c = response["predictions"][0]["label"]  # class label
             # probability of class
-            p = str(response["predictions"][0]["probability"])
-            # insert prediction into database
-            insert_into_db(category=c, probability=p)
-            # retrieve all predictions
-            df = return_apicalls_table_into_pandas()
-            df = df.sort_index(ascending=False)
+            # p = str(response["predictions"][0]["probability"])
+
             # render results on new page
             return render_template(
                 "prediction_result.html",
-                category=c,
-                df=df.to_html(classes="data", header="true"),
+                category=c
             )
 
     return render_template("predict.html")
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0")

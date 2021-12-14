@@ -12,4 +12,9 @@ There are the following components:
 
 When code is pushed to Bitbucket, the commit is autodected and CI/CD Actions pipeline kicks in.
 There can be several intermediate steps during build phase - just for testing purposes I use linting (flake8).
-The application is deployed to AWS App runner.
+The application is deployed to AWS App runner.\
+
+Run with:\
+docker run -p 5000:5000 <name of built image>\
+
+For local server, run on: localhost:5000
